@@ -100,7 +100,7 @@ def make_plots(raw_fps):
 
     # total average fps
     avg_fps = np.average(raw_fps)
-    print(f'{avg_fps:.2f}')
+    print(f'average FPS: {avg_fps:.2f}')
     
     plt.plot(x, raw_fps, linewidth=0.8)
     plt.plot(x, rolling_fps)
@@ -123,8 +123,7 @@ if __name__ == '__main__':
     raw_fps = []
     total = 0
     while(True):
-        ret, img = cap.read()
-        
+        ret, img = cap.read() 
         
         if args.for_loop:
             with_for_loop(img)
