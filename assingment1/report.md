@@ -1,8 +1,9 @@
-Assignment 1: OpenCV setup and point operations
-===============================================
-
-David Pažout
+# Assignment 1: OpenCV setup and point operations
+### author: David Pažout
 ------------
+
+
+## assignment requirements
 
 For testing, check and write down answers to the following questions:
 - The processing time for one video frame or image?
@@ -12,22 +13,23 @@ For testing, check and write down answers to the following questions:
 - Moving your hand in front of the camera, estimate the latency between image capture and display.
 - Is the latency different when capturing from a mobile phone?
 
-------
+## results
 
+For determining the processing time in FPS, I collected data for time-span of 10 seconds. I took a rolling and total average of the data. 
 
-
-The processing time for one video frame is around 120 FPS. 
+The processing time for one video frame without any additional processing is around 120 FPS. 
 ![alt text](images/average_FPS.png)
 
 Adding the bright spot detection increases the processing time for the video frame to 114 FPS.
 ![alt text](images/average_FPS_bsd.png)
 
-When not displaying the image the processing time increases to 12 ms or 80 FPS. The increase in time needed to process a frame is likely caused by printing of the FPS number to the console, thus adding additional overhead.
+When not displaying the image (still doing the bright spot detection) the processing time increases to 60 FPS. 
 ![alt text](images/average_FPS_no_display.png)
 
-Moving the processing to a double for loop decreases the FPS to 0.
+Moving the processing to a double for loop decreases the FPS to 0.4 FPS.
 ![alt text](images/average_FPS_for_loop.png)
 
-I estimate the latency between image capture and display to be around 0.1 second but I have no process of validating my estimate.
 
+
+I estimate the latency between image capture and display to be around 0.1 second but I have no process of validating my estimate.
 The latency from a mobile phone is around 1 second.
