@@ -68,7 +68,6 @@ def add_fps(img):
 
 
 def RANSAC(points, iterations, delta):
-    max_hit_count = 0
     best_fit = [0,0,0]
     best_hit_points = np.array([[0,0]])
     if len(points) == 0:
@@ -78,17 +77,18 @@ def RANSAC(points, iterations, delta):
     rnd_idxs2 = rng.integers(low=0, high=len(points), size=iterations)
     rnd_p1 = points[rnd_idxs1]  
     rnd_p2 = points[rnd_idxs2] 
-    lines = np.cross(rnd_p1, rnd_p2)
-    norm_factors = np.linalg.norm(lines[:,:2],axis=1)
-    lines = lines/norm_factors.reshape((norm_factors.shape[0],1))
+    lines = np.cross(rnd_p1, rnd_p2) 
+    norm_factors = np.linalg.norm(lines[:,:2],axis=1).reshape((lines.shape[0],1))
+    lines = lines/norm_factors
     distances = np.abs(points @ lines.T)
     hit_points = distances < delta
-    hit_count = np.sum(hit_points,axis=0)
+    hit_count = np.sum(hit_points, axis=0)
     idx = np.argmax(hit_count)
     best_fit = lines[idx]
     best_hit_points = points[hit_points.T[idx]][:,:2]
     return best_fit, best_hit_points
     
+    # max_hit_count = 0
     # for k in range(iterations):
     #     p1, p2 = points[rnd_idxs1[k]], points[rnd_idxs2[k]]
     #     a, b, c = np.cross(p1,p2)
