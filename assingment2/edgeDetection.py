@@ -12,13 +12,14 @@ parser.add_argument('-show', type=str, nargs='*', choices=['edges', 'inliers', '
                         help='sets parts of post-processing to be displayed')
 parser.add_argument('-img_size', type=int, nargs=2, default=[640,480], metavar=('WIDTH', 'HEIGHT'),
                         help='sets image size')
-parser.add_argument('-canny', type=int, nargs=2, default=[100, 300], metavar=('LOW_THRESHOLD', 'HIGH_THRESHOLD'),
+parser.add_argument('-canny', type=int, nargs=2, default=[100, 200], metavar=('LOW_THRESHOLD', 'HIGH_THRESHOLD'),
                         help='low and hight threshold for Canny edge detection')
 parser.add_argument('-RANSAC', type=int, nargs=2, default=[512, 4], metavar=('ITERATIONS', 'DELTA'),
                         help='number of iterations and delta for RANSAC line fitting')
 
 font = cv.FONT_HERSHEY_SIMPLEX 
 now = time.time()
+rng = np.random.default_rng()
 
 def make_plots(raw_fps):
     #create x axis
@@ -72,25 +73,39 @@ def RANSAC(points, iterations, delta):
     best_hit_points = np.array([[0,0]])
     if len(points) == 0:
         return best_fit, best_hit_points
+
+    rnd_idxs1 = rng.integers(low=0, high=len(points), size=iterations)  
+    rnd_idxs2 = rng.integers(low=0, high=len(points), size=iterations)
+    rnd_p1 = points[rnd_idxs1]  
+    rnd_p2 = points[rnd_idxs2] 
+    lines = np.cross(rnd_p1, rnd_p2)
+    norm_factors = np.linalg.norm(lines[:,:2],axis=1)
+    lines = lines/norm_factors.reshape((norm_factors.shape[0],1))
+    distances = np.abs(points @ lines.T)
+    hit_points = distances < delta
+    hit_count = np.sum(hit_points,axis=0)
+    idx = np.argmax(hit_count)
+    best_fit = lines[idx]
+    best_hit_points = points[hit_points.T[idx]][:,:2]
+    return best_fit, best_hit_points
     
-    for _ in range(iterations):
-        p1, p2 = points[random.randint(0,len(points)-1)], points[random.randint(0,len(points)-1)]
-        a, b, c = np.cross(p1,p2)
-        norm_factor = (a**2+b**2)**0.5
-        distances = np.abs(points @ [a,b,c])/norm_factor
-        hit_points = distances < delta
-        hit_count = np.sum(hit_points)
+    # for k in range(iterations):
+    #     p1, p2 = points[rnd_idxs1[k]], points[rnd_idxs2[k]]
+    #     a, b, c = np.cross(p1,p2)
+    #     norm_factor = (a**2+b**2)**0.5
+    #     distances = np.abs(points @ [a,b,c])/norm_factor
+    #     hit_points = distances < delta
+    #     hit_count = np.sum(hit_points)
         
-        if hit_count > max_hit_count:
-            max_hit_count = hit_count
-            best_fit = np.array([b,a,c])/norm_factor
-            best_hit_points = points[hit_points]
-    
-    return best_fit, best_hit_points[:,:2]
+    #     if hit_count > max_hit_count:
+    #         max_hit_count = hit_count
+    #         best_fit = np.array([a,b,c])/norm_factor
+    #         best_hit_points = points[hit_points]
+    # return best_fit, best_hit_points[:,:2]
 
 
 def draw_line(img, line_parameters):
-    a,b,c = line_parameters
+    b,a,c = line_parameters
     if abs(a) < 0.0001:
         a = 0.0001
     y0 = int(0)
